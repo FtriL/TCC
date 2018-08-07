@@ -2,22 +2,34 @@ package br.com.sys.bean;
 
 public class mesasBean {
 
-	int idMesa, qrcode, idPedido;
-
+	private int idMesa;
+	private boolean usoMesa;
+	private int idCategoria;
+	private int idCliente;
 	public int getIdMesa() {
 		return idMesa;
 	}
-
 	public void setIdMesa(int idMesa) {
 		this.idMesa = idMesa;
 	}
-
-	public int getIdPedido() {
-		return idPedido;
+	public boolean isUsoMesa() {
+		return usoMesa;
 	}
-
-	public void setIdPedido(int idPedido) {
-		this.idPedido = idPedido;
+	public void setUsoMesa(boolean usoMesa) {
+		this.usoMesa = usoMesa;
 	}
+	public int getIdCategoria() {
+		return idCategoria;
+	}
+	public void setIdCategoria(int idCategoria) {
+		this.idCategoria = idCategoria;
+	}
+	public int getIdCliente() {
+		return idCliente;
+	}
+	public void setIdCliente(int idCliente) {
+		this.idCliente = idCliente;
+	}
+	
 
 }
