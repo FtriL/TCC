@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class categorias_mesasBean {
+public class Categorias_mesasBean {
 	private int idCategoria;
 	private String nomeCategoria;
 	public int getIdCategoria() {

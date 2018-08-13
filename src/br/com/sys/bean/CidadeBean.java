@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class cidadeBean {
+public class CidadeBean {
 	private int idCidade;
 	private String nomeCidade;
 	private int idEstado;

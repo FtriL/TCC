@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class clientesBean {
+public class ClientesBean {
 	private int idCliente;
 	private String nomeCliente;
 	private int idEndereco;

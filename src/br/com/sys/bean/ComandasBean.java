@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class comandasBean {
+public class ComandasBean {
 	private int idComanda;
 	private int idMesa;
 	private int idProduto;

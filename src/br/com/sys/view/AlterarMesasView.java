@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import br.com.sys.bean.mesasBean;
+import br.com.sys.bean.MesasBean;
 import br.com.sys.dao.mesasDao;
 
 import javax.swing.JLabel;
@@ -25,7 +25,7 @@ public class AlterarMesasView extends JFrame {
 	private JTextField textField_1;
 	private JTextField textField_2;
 
-	public AlterarMesasView(mesasBean mb) {
+	public AlterarMesasView(MesasBean mb) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 393, 300);
 		contentPane = new JPanel();
@@ -63,7 +63,7 @@ public class AlterarMesasView extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				
 				//Obter dados
-				mesasBean mb = new mesasBean();
+				MesasBean mb = new MesasBean();
 				mb.setIdMesa(Integer.parseInt(textField.getText()));
 				mb.setIdPedido(Integer.parseInt(textField_1.getText()));
 				

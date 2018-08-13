@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class mesasBean {
+public class MesasBean {
 
 	private int idMesa;
 	private boolean usoMesa;

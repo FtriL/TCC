@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class pagamentoBean {
+public class PagamentoBean {
 	private int idCondicao;
 	private String nomeCondicao;
 	public int getIdCondicao() {

@@ -4,7 +4,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import br.com.sys.bean.mesasBean;
+import br.com.sys.bean.MesasBean;
 import br.com.sys.dao.mesasDao;
 
 import javax.swing.JLabel;
@@ -74,7 +74,7 @@ public class mesasView extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 
 				// Obter dados informados
-				mesasBean mb = new mesasBean();
+				MesasBean mb = new MesasBean();
 				mb.setIdMesa(Integer.parseInt(txt.getText()));
 				mb.setIdPedido(Integer.parseInt(txt2.getText()));
 
@@ -128,7 +128,7 @@ public class mesasView extends JFrame {
 				if((table.getValueAt(linha, 0).toString()).equals("1")){
 				 
 				// Obter dados
-				mesasBean mb = new mesasBean();
+				MesasBean mb = new MesasBean();
 				
 				mb.setIdMesa(Integer.parseInt(table.getValueAt(linha, 0).toString()));
 				mb.setIdPedido(Integer.parseInt(table.getValueAt(linha, 1).toString()));
