@@ -1,17 +1,17 @@
 package br.com.sys.main;
 
 import java.net.ConnectException;
+import java.text.ParseException;
 
 import br.com.sys.connection.ConnectionFactory;
-import br.com.sys.view.mesasView;
+import br.com.sys.view.TelaPrincipal;
 
 public class Menu {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParseException {
 
-		mesasView mv = new mesasView();
-		mv.setVisible(true);
-		//banana
+		TelaPrincipal tl = new TelaPrincipal();
+		tl.setVisible(true);
 
 	}
 
