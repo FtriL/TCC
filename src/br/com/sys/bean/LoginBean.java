@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class loginBean {
+public class LoginBean {
 	private int idLogin;
 	private String usuario;
 	private String senha;

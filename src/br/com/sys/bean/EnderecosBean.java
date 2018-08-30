@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class enderecosBean {
+public class EnderecosBean {
 	private int idEndereco;
 	private String rua;
 	private int numero;

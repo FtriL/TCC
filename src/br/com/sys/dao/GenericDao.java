@@ -3,6 +3,7 @@ package br.com.sys.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -10,20 +11,24 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.table.DefaultTableModel;
+
+import br.com.sys.bean.ProdutosBean;
 import br.com.sys.connection.ConnectionFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class genericDao {
+public class GenericDao {
 	
 	//Atributo para conexao
 	private Connection conexao;
 	
 	//Construtor
-	public genericDao() {
-		this.conexao = new ConnectionFactory().obterConexao();
+	public GenericDao() {
+		//this.conexao = new ConnectionFactory().obterConexao();
 	}
 	
 	public void adicionar(Object obj) throws ClassNotFoundException, IllegalArgumentException, IllegalAccessException  {
@@ -53,12 +58,12 @@ public class genericDao {
             System.out.println(sql);
         stmt.execute();
         } catch (SQLException ex) {
-            Logger.getLogger(genericDao.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GenericDao.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("Registro ADICIONADO ao banco!");
     }
 	
-    public ArrayList<String> listarComboBox(Object obj)
+    public DefaultComboBoxModel  listarComboBox(Object obj)
     // public void listar(Class c)
     throws SQLException, IllegalAccessException, NoSuchMethodException,
     IllegalArgumentException, InvocationTargetException,
@@ -70,9 +75,10 @@ public class genericDao {
 		System.out.println(sql);
 		Statement stmt = conexao.createStatement();
 		ResultSet rset = stmt.executeQuery(sql);
-		ArrayList<String> list = new ArrayList<>();
+		DefaultComboBoxModel list = new DefaultComboBoxModel();
 		while (rset.next()) {
-			list.add(rset.getString(2));
+			list.addElement(rset.getString(2));
+
 		}
 		rset.close();
 		stmt.close();
@@ -131,6 +137,64 @@ public class genericDao {
 
         return list;
 
+    }
+    
+    public DefaultTableModel geraTabela(Class c, String[] colunas, String[] dados) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException, SQLException {
+		DefaultTableModel exibirDados = new DefaultTableModel();
+		
+		//Criar colunas
+		for (String col : colunas) {
+			exibirDados.addColumn(c);
+		}
+		String[] linhas = new String[colunas.length];
+		List<Object> lista = listarTabela(c);
+	
+		for (Object l : lista) {
+			Object obj = l;
+			for(int x = 0; x<colunas.length; x++) {
+				for(Method m : c.getMethods()) {
+					String metodo = m.getName();
+					if((metodo.substring((metodo.length()-dados[x].length()), metodo.length())).equalsIgnoreCase(dados[x])) {
+						if(dados[x].substring(0,2).equalsIgnoreCase("id")) {
+							linhas[x] = selecionadado(c.getSimpleName().substring(0,c.getSimpleName().length()-4), dados[x],Integer.parseInt(""+obj.getClass().getMethod(m.getName(), int.class)), 2);
+						}else if(m.getParameterTypes().equals("double")) {
+							linhas[x] = String.format("%.2f",obj.getClass().getMethod(m.getName(), double.class));
+						}else if(m.getParameterTypes().equals("int")) {
+							linhas[x] = ""+obj.getClass().getMethod(m.getName(), int.class);
+						}else {
+							linhas[x] = ""+obj.getClass().getMethod(m.getName(), String.class);
+						}
+					}
+				}
+
+			}
+ 
+			
+			exibirDados.addRow(linhas);
+		}
+		
+
+		
+		
+		return exibirDados;
+	}
+    public String selecionadado(String tabela, String campo, int valor, int coluna) throws SQLException {
+    	String select = "";
+    	String sql = "SELECT * FROM ? where ? = ?";
+    	PreparedStatement stmt  = this.conexao.prepareStatement(sql);
+        stmt.setString(1, tabela);
+        stmt.setString(2, campo);
+        stmt.setInt(1, valor);
+        ResultSet rs = stmt.executeQuery();
+
+        rs.last();
+ 
+        select = rs.getString(coluna);
+        
+		rs.close();
+		stmt.close();
+		return select;
+    	
     }
 
     public void alterar(Object obj) throws ClassNotFoundException,

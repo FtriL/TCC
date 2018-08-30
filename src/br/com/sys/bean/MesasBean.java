@@ -1,10 +1,9 @@
 package br.com.sys.bean;
 
-public class mesasBean {
+public class MesasBean {
 
 	private int idMesa;
 	private boolean usoMesa;
-	private int idCategoria;
 	private int idCliente;
 	public int getIdMesa() {
 		return idMesa;
@@ -18,12 +17,7 @@ public class mesasBean {
 	public void setUsoMesa(boolean usoMesa) {
 		this.usoMesa = usoMesa;
 	}
-	public int getIdCategoria() {
-		return idCategoria;
-	}
-	public void setIdCategoria(int idCategoria) {
-		this.idCategoria = idCategoria;
-	}
+
 	public int getIdCliente() {
 		return idCliente;
 	}

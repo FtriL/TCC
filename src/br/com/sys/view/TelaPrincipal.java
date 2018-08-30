@@ -1,5 +1,6 @@
 package br.com.sys.view;
 
+import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -8,7 +9,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -23,6 +28,11 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
+
+import br.com.sys.bean.Categorias_produtosBean;
+import br.com.sys.bean.ProdutosBean;
+import br.com.sys.dao.GenericDao;
+
 import javax.swing.JTextField;
 import javax.swing.JTextArea;
 import javax.swing.JFormattedTextField;
@@ -32,7 +42,10 @@ import java.awt.Panel;
 import javax.swing.BoxLayout;
 import javax.swing.JSlider;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JCheckBox;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class TelaPrincipal extends JFrame {
 
@@ -48,7 +61,8 @@ public class TelaPrincipal extends JFrame {
 	private JLabel lblNomeProduto;
 	private JTextField campoNomeProduto;
 	private JLabel lblDescrioDoProduto;
-	private JTextArea DescriçãoProduto;
+	private JTextArea descricaoProduto;
+	private JFormattedTextField valorAlterarProduto; 
 	private JFormattedTextField formattedTextField;
 	private JTextField textField;
 	private JButton btnAdicionarImagem;
@@ -102,6 +116,9 @@ public class TelaPrincipal extends JFrame {
 	private JButton btnCancelarCadastroFuncionarios;
 	private JLabel labelTelefone;
 	private JFormattedTextField FormattedTelefone;
+	private GenericDao gd = new GenericDao();
+	private int alterar = 0;
+	private JButton btnAlterar_1;
 
 	/**
 	 * Launch the application.
@@ -178,13 +195,31 @@ public class TelaPrincipal extends JFrame {
 		lblDescrioDoProduto.setBounds(10, 189, 213, 56);
 		panelCadastrarProduto.add(lblDescrioDoProduto);
 
-		DescriçãoProduto = new JTextArea();
-		DescriçãoProduto.setBounds(10, 256, 346, 172);
-		panelCadastrarProduto.add(DescriçãoProduto);
-		DescriçãoProduto.setFont(new Font("Agency FB", Font.PLAIN, 25));
-		DescriçãoProduto.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		descricaoProduto = new JTextArea();
+		descricaoProduto.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent arg0) {
+				//pular linha, fazer funcao.
+			}
+		});
+		descricaoProduto.setBounds(10, 256, 346, 172);
+		panelCadastrarProduto.add(descricaoProduto);
+		descricaoProduto.setFont(new Font("Agency FB", Font.PLAIN, 25));
+		descricaoProduto.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-		formattedTextField = new JFormattedTextField(new NumberFormatter());
+		formattedTextField = new JFormattedTextField(new DecimalFormat("#,##0.00"));
+		formattedTextField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent evt) {
+				String caracteres="0987654321,";
+				if(!caracteres.contains(evt.getKeyChar()+"")){
+					evt.consume();
+				}
+
+			}
+		});
+
+
 		formattedTextField.setFont(new Font("Agency FB", Font.PLAIN, 25));
 		formattedTextField.setBounds(535, 112, 195, 50);
 		panelCadastrarProduto.add(formattedTextField);
@@ -203,6 +238,27 @@ public class TelaPrincipal extends JFrame {
 		panelCadastrarProduto.add(comboBox);
 
 		JButton btnAdicionar = new JButton("ADICIONAR");
+		btnAdicionar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				ProdutosBean pb = new ProdutosBean();
+				pb.setNomeProduto(campoNomeProduto.getText());
+				pb.setValorProduto(Double.parseDouble(formattedTextField.getText().replaceAll(",", ".")));
+				pb.setDescricaoProduto(descricaoProduto.getText());
+				pb.setIdCategoria(comboBox.getSelectedIndex());
+				try {
+					gd.adicionar(pb);
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 		btnAdicionar.setForeground(Color.WHITE);
 		btnAdicionar.setBackground(new Color(139, 69, 19));
 		btnAdicionar.setFocusable(false);
@@ -236,6 +292,11 @@ public class TelaPrincipal extends JFrame {
 		panelCadastrarProduto.add(btnCancelar);
 
 		btnAdicionarImagem = new JButton("+");
+		btnAdicionarImagem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+			}
+		});
 		btnAdicionarImagem.setForeground(Color.WHITE);
 		btnAdicionarImagem.setFont(new Font("Agency FB", Font.PLAIN, 30));
 		btnAdicionarImagem.setFocusable(false);
@@ -260,8 +321,10 @@ public class TelaPrincipal extends JFrame {
 		panelListarProdutos.add(lblListagemDeProdutos);
 
 		JTable table_1 = new JTable();
-		table_1.setBounds(21, 58, 708, 438);
-		panelListarProdutos.add(table_1);
+		
+		JScrollPane barraRolagem = new JScrollPane(table_1);
+		barraRolagem.setBounds(21, 58, 708, 438);
+		panelListarProdutos.add(barraRolagem);
 
 		JButton btnCancelar_1 = new JButton("CANCELAR");
 		btnCancelar_1.setForeground(new Color(255, 255, 255));
@@ -292,6 +355,38 @@ public class TelaPrincipal extends JFrame {
 
 				panelListarProdutos.setVisible(false);
 				panelAlterarProdutos.setVisible(true);
+				try {
+					List<Object> list = gd.listarTabela(ProdutosBean.class);
+					ProdutosBean pb = (ProdutosBean) list.get(table_1.getSelectedRow());
+					campoNomeProduto.setText(pb.getNomeProduto());
+					alterar = pb.getIdProduto();
+					descricaoProduto.setText(pb.getDescricaoProduto());
+					valorAlterarProduto.setText(String.format("%.2f",pb.getValorProduto()));
+					comboBox_2.setSelectedIndex(pb.getIdCategoria());
+					
+					
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchMethodException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvocationTargetException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				
 
 			}
@@ -340,16 +435,26 @@ public class TelaPrincipal extends JFrame {
 		lblDescrioDoProduto.setBounds(10, 189, 213, 56);
 		panelAlterarProdutos.add(lblDescrioDoProduto);
 
-		DescriçãoProduto = new JTextArea();
-		DescriçãoProduto.setBounds(10, 256, 346, 172);
-		panelAlterarProdutos.add(DescriçãoProduto);
-		DescriçãoProduto.setFont(new Font("Agency FB", Font.PLAIN, 25));
-		DescriçãoProduto.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		descricaoProduto = new JTextArea();
+		descricaoProduto.setBounds(10, 256, 346, 172);
+		panelAlterarProdutos.add(descricaoProduto);
+		descricaoProduto.setFont(new Font("Agency FB", Font.PLAIN, 25));
+		descricaoProduto.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-		formattedTextField = new JFormattedTextField(new NumberFormatter());
-		formattedTextField.setFont(new Font("Agency FB", Font.PLAIN, 25));
-		formattedTextField.setBounds(535, 112, 195, 50);
-		panelAlterarProdutos.add(formattedTextField);
+		valorAlterarProduto = new JFormattedTextField(new DecimalFormat("#,##0.00"));
+		valorAlterarProduto.setFont(new Font("Agency FB", Font.PLAIN, 25));
+		valorAlterarProduto.setBounds(535, 112, 195, 50);
+		panelAlterarProdutos.add(valorAlterarProduto);
+		panelAlterarProdutos.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent evt) {
+				String caracteres="0987654321,";
+				if(!caracteres.contains(evt.getKeyChar()+"")){
+					evt.consume();
+				}
+
+			}
+		});
 
 		lblCategoria = new JLabel("Categoria:");
 		lblCategoria.setFont(new Font("Agency FB", Font.PLAIN, 30));
@@ -364,17 +469,44 @@ public class TelaPrincipal extends JFrame {
 		comboBox_2.addItem("-- Selecione --");
 		panelAlterarProdutos.add(comboBox_2);
 
-		btnAlterar = new JButton("ALTERAR");
-		btnAlterar.setForeground(Color.WHITE);
-		btnAlterar.setBackground(new Color(139, 69, 19));
-		btnAlterar.setFocusable(false);
-		btnAlterar.setFocusPainted(false);
-		btnAlterar.setFocusTraversalKeysEnabled(false);
-		btnAlterar.setFont(new Font("Agency FB", Font.PLAIN, 30));
-		btnAlterar.setBounds(71, 439, 624, 56);
-		btnAlterar.setFocusPainted(false);
-		btnAlterar.setFocusTraversalKeysEnabled(false);
-		panelAlterarProdutos.add(btnAlterar);
+		btnAlterar_1 = new JButton("ALTERAR");
+		btnAlterar_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				ProdutosBean pb = new ProdutosBean();
+				pb.setIdProduto(alterar);
+				pb.setNomeProduto(campoNomeProduto.getText());
+				pb.setValorProduto(Double.parseDouble(formattedTextField.getText().replaceAll(",", ".")));
+				pb.setDescricaoProduto(descricaoProduto.getText());
+				pb.setIdCategoria(comboBox.getSelectedIndex());
+				try {
+					gd.alterar(pb);
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+			}
+		});
+		btnAlterar_1.setForeground(Color.WHITE);
+		btnAlterar_1.setBackground(new Color(139, 69, 19));
+		btnAlterar_1.setFocusable(false);
+		btnAlterar_1.setFocusPainted(false);
+		btnAlterar_1.setFocusTraversalKeysEnabled(false);
+		btnAlterar_1.setFont(new Font("Agency FB", Font.PLAIN, 30));
+		btnAlterar_1.setBounds(71, 439, 624, 56);
+		btnAlterar_1.setFocusPainted(false);
+		btnAlterar_1.setFocusTraversalKeysEnabled(false);
+		panelAlterarProdutos.add(btnAlterar_1);
 
 		btnCancelar = new JButton("CANCELAR");
 		btnCancelar.setForeground(Color.WHITE);
@@ -611,8 +743,10 @@ public class TelaPrincipal extends JFrame {
 		panelListagemMesas.add(lblListaDeMesas);
 
 		table_2 = new JTable();
-		table_2.setBounds(10, 70, 730, 206);
-		panelListagemMesas.add(table_2);
+		JScrollPane barraRolagemtb2 = new JScrollPane(table_2);
+		barraRolagemtb2.setBounds(10, 70, 730, 206);
+		panelListagemMesas.add(barraRolagemtb2);
+		
 
 		table_3 = new JTable();
 		table_3.setBounds(10, 354, 730, 206);
@@ -1689,6 +1823,32 @@ public class TelaPrincipal extends JFrame {
 
 				panelCadastrarProduto.setVisible(true);
 				panelCardapio.setVisible(false);
+				Categorias_produtosBean cp = new Categorias_produtosBean();
+				
+				try {
+					comboBox.setModel(gd.listarComboBox(cp));
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchMethodException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvocationTargetException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
 			}
 		});
@@ -1710,6 +1870,30 @@ public class TelaPrincipal extends JFrame {
 
 				panelListarProdutos.setVisible(true);
 				panelCardapio.setVisible(false);
+				try {
+					table_1.setModel(gd.geraTabela(ProdutosBean.class,new String[]{"Produto", "Valor", "Descrição", "Categoria"},new String[]{"nomeProduto", "valorProduto", "descricaoProduto", "idCategoria"} ));
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchMethodException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvocationTargetException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
 			}
 		});
@@ -1762,6 +1946,7 @@ public class TelaPrincipal extends JFrame {
 
 				panelListagemMesas.setVisible(true);
 				panelMesas.setVisible(false);
+				
 
 			}
 		});
@@ -2012,6 +2197,10 @@ public class TelaPrincipal extends JFrame {
 		});
 
 		button_1 = new JButton("");
+		button_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		button_1.setForeground(Color.BLACK);
 		button_1.setBackground(new Color(255, 255, 255));
 		button_1.setFocusTraversalKeysEnabled(false);

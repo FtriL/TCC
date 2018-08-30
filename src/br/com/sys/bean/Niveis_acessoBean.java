@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class niveis_acessoBean {
+public class Niveis_acessoBean {
 	 private int idNivel_Acesso;
 	 private String descricao;
 	public int getIdNivel_Acesso() {

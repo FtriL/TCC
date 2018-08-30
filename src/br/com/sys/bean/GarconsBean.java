@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class garconsBean {
+public class GarconsBean {
 	private int idGarcom;
 	private int idFuncionario;
 	public int getIdGarcom() {

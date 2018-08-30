@@ -1,6 +1,6 @@
 package br.com.sys.bean;
 
-public class cartaoFidelidadeBean {
+public class CartaoFidelidadeBean {
 	private int idCartao;
 	private int idCliente;
 	private int metaFidelidade;
