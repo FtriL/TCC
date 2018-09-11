@@ -7,6 +7,13 @@ public class ComandasBean {
 	private int quantidadeComanda;
 	private double valorUnidadeComanda;
 	private double valorTotalComanda;
+	private String emitidaComanda;
+	public String getEmitidaComanda() {
+		return emitidaComanda;
+	}
+	public void setEmitidaComanda(String emitidaComanda) {
+		this.emitidaComanda = emitidaComanda;
+	}
 	public int getIdComanda() {
 		return idComanda;
 	}

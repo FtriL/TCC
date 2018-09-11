@@ -7,6 +7,14 @@ public class PedidosBean {
 	private int idGarcom;
 	private String data;
 	private String hora;
+	private int fechadoPedido;
+
+	public int getFechadoPedido() {
+		return fechadoPedido;
+	}
+	public void setFechadoPedido(int fechadoPedido) {
+		this.fechadoPedido = fechadoPedido;
+	}
 	public int getIdPedido() {
 		return idPedido;
 	}

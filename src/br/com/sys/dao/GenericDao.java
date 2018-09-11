@@ -1,9 +1,11 @@
 package br.com.sys.dao;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -12,14 +14,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.TableView.TableRow;
 
-import br.com.sys.bean.ProdutosBean;
+import br.com.sys.bean.ComandasBean;
+import br.com.sys.bean.Pedidos_comandasBean;
+import br.com.sys.bean.PedidosBean;
 import br.com.sys.connection.ConnectionFactory;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class GenericDao {
 	
@@ -28,7 +30,7 @@ public class GenericDao {
 	
 	//Construtor
 	public GenericDao() {
-		//this.conexao = new ConnectionFactory().obterConexao();
+		this.conexao = new ConnectionFactory().obterConexao();
 	}
 	
 	public void adicionar(Object obj) throws ClassNotFoundException, IllegalArgumentException, IllegalAccessException  {
@@ -76,6 +78,7 @@ public class GenericDao {
 		Statement stmt = conexao.createStatement();
 		ResultSet rset = stmt.executeQuery(sql);
 		DefaultComboBoxModel list = new DefaultComboBoxModel();
+		list.addElement("-- Selecione --");
 		while (rset.next()) {
 			list.addElement(rset.getString(2));
 
@@ -134,45 +137,212 @@ public class GenericDao {
 
         rset.close();
         stmt.close();
-
+        System.out.println("Lista gerada");
         return list;
 
     }
     
     public DefaultTableModel geraTabela(Class c, String[] colunas, String[] dados) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException, SQLException {
-		DefaultTableModel exibirDados = new DefaultTableModel();
+	    boolean[] canEd = new boolean [dados.length];  
+	    for(int x=0; x<dados.length; x++) {
+	    	if(x>colunas.length-1) {
+	    		canEd[x]=true;
+	    	}else{
+	    		System.out.println(x);
+		    	if((colunas[x].length()>9)) {
+		    		if(colunas[x].substring(0, 10).equals("Quantidade")){
+		    			canEd[x]=true;
+		    		}else {
+			    		canEd[x]=false;
+	
+		    		}
+		    		
+		    	}else {
+		    		canEd[x]=false;
+		    	}
+	    	}
+	    }
+	    System.out.println("aqui "+canEd[1]);
+    	DefaultTableModel exibirDados = new DefaultTableModel(){    
+		    boolean[] canEdit = canEd;    
+		    @Override
+		    public boolean isCellEditable(int rowIndex, int columnIndex) {      
+		        return canEdit [columnIndex];      
+		    }    
+		};
 		
 		//Criar colunas
 		for (String col : colunas) {
-			exibirDados.addColumn(c);
+			exibirDados.addColumn(col);
+			System.out.println(col);
 		}
 		String[] linhas = new String[colunas.length];
 		List<Object> lista = listarTabela(c);
 	
 		for (Object l : lista) {
-			Object obj = l;
+			Object obj = (Object) l;
+			
 			for(int x = 0; x<colunas.length; x++) {
 				for(Method m : c.getMethods()) {
+					
 					String metodo = m.getName();
-					if((metodo.substring((metodo.length()-dados[x].length()), metodo.length())).equalsIgnoreCase(dados[x])) {
-						if(dados[x].substring(0,2).equalsIgnoreCase("id")) {
-							linhas[x] = selecionadado(c.getSimpleName().substring(0,c.getSimpleName().length()-4), dados[x],Integer.parseInt(""+obj.getClass().getMethod(m.getName(), int.class)), 2);
-						}else if(m.getParameterTypes().equals("double")) {
-							linhas[x] = String.format("%.2f",obj.getClass().getMethod(m.getName(), double.class));
-						}else if(m.getParameterTypes().equals("int")) {
-							linhas[x] = ""+obj.getClass().getMethod(m.getName(), int.class);
-						}else {
-							linhas[x] = ""+obj.getClass().getMethod(m.getName(), String.class);
+					/*if(dados[x].equalsIgnoreCase("Button")) {
+						linhas[x]="EXCLUIR";
+					}else {*/
+						if(metodo.substring(0,3).equalsIgnoreCase("get")){
+							if((metodo.substring((3), metodo.length())).equalsIgnoreCase(dados[x])) {
+								Class[] args = new Class[1];
+	
+								System.out.println("-------");
+
+							
+								if((dados[x].substring(0,2).equalsIgnoreCase("id")&&(!dados[x].substring(2,dados[x].length()).equalsIgnoreCase("id")))) {
+									linhas[x] = selecionadado(dados[x].substring(2, dados[x].length()), dados[x],Integer.parseInt(""+obj.getClass().getMethod(m.getName()).invoke(obj)), 2);
+		
+								}else if(m.getReturnType().getName().equals("double")) {
+									linhas[x] = String.format("%.2f",obj.getClass().getMethod(m.getName()).invoke(obj));
+								}else if(m.getReturnType().getName().equals("int")){
+									linhas[x] = "" +obj.getClass().getMethod(m.getName()).invoke(obj);
+								}else {
+									linhas[x] = "" +obj.getClass().getMethod(m.getName()).invoke(obj);
+									if(linhas[x].equalsIgnoreCase("0")) {
+										linhas[x] = "Não";
+									}else if(linhas[x].equalsIgnoreCase("1")) {
+										linhas[x] = "Sim";
+									}
+								}
+							}
+							//System.out.println("linha"+linhas[x]);
 						}
-					}
+					//}
 				}
 
 			}
- 
+			
+
 			
 			exibirDados.addRow(linhas);
+			
+			if(dados[dados.length-1].equals("check")) {
+				Object ck[] = new Object[exibirDados.getRowCount()];
+				for(int x = 0; x<exibirDados.getRowCount();x++) {
+					ck[x]= new Boolean(false);
+				}
+				exibirDados.addColumn("Excluir", ck);
+			}
+
+	
 		}
+
 		
+
+		
+		
+		return exibirDados;
+	}
+    public DefaultTableModel listaMesa(int mesa, String[] colunas, String[] dados) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException, SQLException {
+	    System.out.println("mesa"+mesa);
+    	boolean[] canEd = new boolean [dados.length];  
+	    for(int x=0; x<dados.length; x++) {
+	    	if(x>colunas.length-1) {
+	    		canEd[x]=true;
+	    	}else{
+	    		System.out.println(x);
+		    	if((colunas[x].length()>9)) {
+		    		if(colunas[x].substring(0, 10).equals("Quantidade")){
+		    			canEd[x]=true;
+		    		}else {
+			    		canEd[x]=false;
+	
+		    		}
+		    		
+		    	}else {
+		    		canEd[x]=false;
+		    	}
+	    	}
+	    }
+    	DefaultTableModel exibirDados = new DefaultTableModel(){    
+		    boolean[] canEdit = canEd;    
+		    @Override
+		    public boolean isCellEditable(int rowIndex, int columnIndex) {      
+		        return canEdit [columnIndex];      
+		    }    
+		};
+		
+		//Criar colunas
+		for (String col : colunas) {
+			exibirDados.addColumn(col);
+			System.out.println(col);
+		}
+		String[] linhas = new String[colunas.length];
+		
+		Class c = ComandasBean.class;
+		
+		List<Object> lista = listarTabela(c);
+	
+		for (Object l : lista) {
+			ComandasBean cb = (ComandasBean) l;
+			if(cb.getIdMesa()==mesa) {
+				List<Object> lP_C= listarTabela(Pedidos_comandasBean.class);
+				
+				for (Object ob : lP_C) {
+					Pedidos_comandasBean  pc = (Pedidos_comandasBean)ob;
+					
+					if(pc.getIdComanda()==cb.getIdComanda()) {
+						List<Object> lPedidos= listarTabela(PedidosBean.class);
+						for (Object o : lPedidos) {
+							PedidosBean pb= (PedidosBean)o;
+							if(pb.getIdPedido()==pc.getIdPedido()){
+
+								if(pb.getFechadoPedido()==0) {
+									for(int x = 0; x<colunas.length; x++) {
+										if(x==0){
+											linhas[x]=""+cb.getIdComanda();
+										}else if(x==1) {
+											linhas[x]=selecionadado("Produto", "idProduto", cb.getIdProduto(), 2);
+										}else if(x==2) {
+											linhas[x]=""+cb.getQuantidadeComanda();
+										}
+										else if(x==3) {
+											linhas[x]=String.format("%.2f",cb.getValorUnidadeComanda());														}
+										else if(x==4) {
+											linhas[x]=String.format("%.2f",cb.getValorTotalComanda());
+										}
+										else if(x==5) {
+											linhas[x]=""+cb.getEmitidaComanda();
+											if(linhas[x].equalsIgnoreCase("0")) {
+												linhas[x] = "Não";
+											}else if(linhas[x].equalsIgnoreCase("1")) {
+												linhas[x] = "Sim";
+											}
+										}
+
+									}
+								}
+								
+							}
+							
+						}
+					}
+				}
+	
+			}
+			
+			exibirDados.addRow(linhas);
+
+			
+
+	
+		}
+
+		if(dados[dados.length-1].equals("check")) {
+			Object ck[] = new Object[exibirDados.getRowCount()];
+			for(int x = 0; x<exibirDados.getRowCount();x++) {
+				ck[x]= new Boolean(false);
+			}
+			exibirDados.addColumn("Excluir", ck);
+		}
+
 
 		
 		
@@ -180,10 +350,9 @@ public class GenericDao {
 	}
     public String selecionadado(String tabela, String campo, int valor, int coluna) throws SQLException {
     	String select = "";
-    	String sql = "SELECT * FROM ? where ? = ?";
+    	String sql = "SELECT * FROM "+tabela+"s"+" WHERE "+campo+" = ?";
+    	System.out.println(sql);
     	PreparedStatement stmt  = this.conexao.prepareStatement(sql);
-        stmt.setString(1, tabela);
-        stmt.setString(2, campo);
         stmt.setInt(1, valor);
         ResultSet rs = stmt.executeQuery();
 

@@ -26,10 +26,14 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
-import br.com.sys.bean.Categorias_produtosBean;
+import br.com.sys.bean.CategoriasBean;
+import br.com.sys.bean.ComandasBean;
+import br.com.sys.bean.MesasBean;
 import br.com.sys.bean.ProdutosBean;
 import br.com.sys.dao.GenericDao;
 
@@ -40,6 +44,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import java.awt.Panel;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JSlider;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -59,9 +64,9 @@ public class TelaPrincipal extends JFrame {
 			btnCadastroCLIENTE, btnFecharCaixa, btnFecharMesa, btnListagem, btnListagemCLIENTES, btnListagemLISTAGEM,
 			btnPagamento, button, button_1, button_2, button_3, button_4, btnAlterar, btnCancelar, btnCadastrarFuncionario, btnLimparDados;
 	private JLabel lblNomeProduto;
-	private JTextField campoNomeProduto;
+	private JTextField campoNomeProduto, campoNomeProdutoalterar;
 	private JLabel lblDescrioDoProduto;
-	private JTextArea descricaoProduto;
+	private JTextArea descricaoProduto, descricaoProdutoalterar;
 	private JFormattedTextField valorAlterarProduto; 
 	private JFormattedTextField formattedTextField;
 	private JTextField textField;
@@ -305,6 +310,8 @@ public class TelaPrincipal extends JFrame {
 		btnAdicionarImagem.setBackground(new Color(139, 69, 19));
 		btnAdicionarImagem.setBounds(647, 272, 51, 56);
 		panelCadastrarProduto.add(btnAdicionarImagem);
+
+
 		
 		/** Panel Listar Produto **/
 
@@ -321,7 +328,6 @@ public class TelaPrincipal extends JFrame {
 		panelListarProdutos.add(lblListagemDeProdutos);
 
 		JTable table_1 = new JTable();
-		
 		JScrollPane barraRolagem = new JScrollPane(table_1);
 		barraRolagem.setBounds(21, 58, 708, 438);
 		panelListarProdutos.add(barraRolagem);
@@ -356,13 +362,15 @@ public class TelaPrincipal extends JFrame {
 				panelListarProdutos.setVisible(false);
 				panelAlterarProdutos.setVisible(true);
 				try {
+					CategoriasBean cb = new CategoriasBean();
+					comboBox_2.setModel(gd.listarComboBox(cb));
 					List<Object> list = gd.listarTabela(ProdutosBean.class);
-					ProdutosBean pb = (ProdutosBean) list.get(table_1.getSelectedRow());
-					campoNomeProduto.setText(pb.getNomeProduto());
+					ProdutosBean pb = (ProdutosBean) list.get(table_1.getSelectedRow()-1);
+					campoNomeProdutoalterar.setText(pb.getNomeProduto());
 					alterar = pb.getIdProduto();
-					descricaoProduto.setText(pb.getDescricaoProduto());
+					descricaoProdutoalterar.setText(pb.getDescricaoProduto());
 					valorAlterarProduto.setText(String.format("%.2f",pb.getValorProduto()));
-					comboBox_2.setSelectedIndex(pb.getIdCategoria());
+					comboBox_2.setSelectedIndex(pb.getIdCategoria()+1);
 					
 					
 				} catch (IllegalAccessException e1) {
@@ -417,11 +425,11 @@ public class TelaPrincipal extends JFrame {
 		lblNomeProduto.setBounds(10, 112, 141, 56);
 		panelAlterarProdutos.add(lblNomeProduto);
 
-		campoNomeProduto = new JTextField();
-		campoNomeProduto.setFont(new Font("Agency FB", Font.PLAIN, 25));
-		campoNomeProduto.setBounds(161, 112, 195, 50);
-		panelAlterarProdutos.add(campoNomeProduto);
-		campoNomeProduto.setColumns(10);
+		campoNomeProdutoalterar = new JTextField();
+		campoNomeProdutoalterar.setFont(new Font("Agency FB", Font.PLAIN, 25));
+		campoNomeProdutoalterar.setBounds(161, 112, 195, 50);
+		panelAlterarProdutos.add(campoNomeProdutoalterar);
+		campoNomeProdutoalterar.setColumns(10);
 
 		lblValorProduto = new JLabel("Valor Produto:");
 		lblValorProduto.setFont(new Font("Agency FB", Font.PLAIN, 30));
@@ -435,11 +443,11 @@ public class TelaPrincipal extends JFrame {
 		lblDescrioDoProduto.setBounds(10, 189, 213, 56);
 		panelAlterarProdutos.add(lblDescrioDoProduto);
 
-		descricaoProduto = new JTextArea();
-		descricaoProduto.setBounds(10, 256, 346, 172);
-		panelAlterarProdutos.add(descricaoProduto);
-		descricaoProduto.setFont(new Font("Agency FB", Font.PLAIN, 25));
-		descricaoProduto.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		descricaoProdutoalterar = new JTextArea();
+		descricaoProdutoalterar.setBounds(10, 256, 346, 172);
+		panelAlterarProdutos.add(descricaoProdutoalterar);
+		descricaoProdutoalterar.setFont(new Font("Agency FB", Font.PLAIN, 25));
+		descricaoProdutoalterar.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
 		valorAlterarProduto = new JFormattedTextField(new DecimalFormat("#,##0.00"));
 		valorAlterarProduto.setFont(new Font("Agency FB", Font.PLAIN, 25));
@@ -474,10 +482,10 @@ public class TelaPrincipal extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				ProdutosBean pb = new ProdutosBean();
 				pb.setIdProduto(alterar);
-				pb.setNomeProduto(campoNomeProduto.getText());
-				pb.setValorProduto(Double.parseDouble(formattedTextField.getText().replaceAll(",", ".")));
-				pb.setDescricaoProduto(descricaoProduto.getText());
-				pb.setIdCategoria(comboBox.getSelectedIndex());
+				pb.setNomeProduto(campoNomeProdutoalterar.getText());
+				pb.setValorProduto(Double.parseDouble(valorAlterarProduto.getText().replaceAll(",", ".")));
+				pb.setDescricaoProduto(descricaoProdutoalterar.getText());
+				pb.setIdCategoria(comboBox_2.getSelectedIndex());
 				try {
 					gd.alterar(pb);
 				} catch (ClassNotFoundException e) {
@@ -713,7 +721,7 @@ public class TelaPrincipal extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				dispose();
+				//gd.geraTabela(c, colunas, dados)
 
 			}
 		});
@@ -724,11 +732,14 @@ public class TelaPrincipal extends JFrame {
 		panelLayoutMesa.add(label_6);
 
 		table = new JTable();
-		table.setBounds(20, 443, 709, 117);
-		panelLayoutMesa.add(table);
-				
+		JScrollPane barraRolagemtb = new JScrollPane(table);
+		barraRolagemtb.setBounds(20, 443, 709, 117);
+		panelLayoutMesa.add(barraRolagemtb);
+		table.setEnabled(false);
 		
 		/** Panel Listagem Mesas **/
+		
+		
 
 		JPanel panelListagemMesas = new JPanel();
 		panelListagemMesas.setVisible(false);
@@ -741,7 +752,39 @@ public class TelaPrincipal extends JFrame {
 		lblListaDeMesas.setFont(new Font("Agency FB", Font.PLAIN, 30));
 		lblListaDeMesas.setBounds(259, 11, 232, 36);
 		panelListagemMesas.add(lblListaDeMesas);
-
+		
+		JButton btnExcluirIten = new JButton("Excluir");
+		btnExcluirIten.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				ComandasBean cb = new ComandasBean();
+				
+				
+				 for(int i = 0; i < table_3.getModel().getRowCount(); i++){
+			            Boolean selecionado =  (Boolean) table_3.getModel().getValueAt(i, 5);
+			              if(selecionado==true) {
+			                System.out.println("marcado "+i);
+			              }else {
+			            	  System.out.println("Desmarcado "+i);
+			              }
+			          }
+				/*try {
+					gd.excluir(cb);
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchFieldException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}*/
+				
+			}
+		});
+		btnExcluirIten.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		btnExcluirIten.setBounds(645, 310, 89, 31);
+		panelListagemMesas.add(btnExcluirIten);
 		table_2 = new JTable();
 		JScrollPane barraRolagemtb2 = new JScrollPane(table_2);
 		barraRolagemtb2.setBounds(10, 70, 730, 206);
@@ -749,8 +792,9 @@ public class TelaPrincipal extends JFrame {
 		
 
 		table_3 = new JTable();
-		table_3.setBounds(10, 354, 730, 206);
-		panelListagemMesas.add(table_3);
+		JScrollPane barraRolagemtb3 = new JScrollPane(table_3);
+		barraRolagemtb3.setBounds(10, 354, 730, 206);
+		panelListagemMesas.add(barraRolagemtb3);
 
 		lblProdutosDaMesa = new JLabel("PRODUTOS DA MESA SELECIONADA:");
 		lblProdutosDaMesa.setFont(new Font("Agency FB", Font.PLAIN, 30));
@@ -1823,7 +1867,7 @@ public class TelaPrincipal extends JFrame {
 
 				panelCadastrarProduto.setVisible(true);
 				panelCardapio.setVisible(false);
-				Categorias_produtosBean cp = new Categorias_produtosBean();
+				CategoriasBean cp = new CategoriasBean();
 				
 				try {
 					comboBox.setModel(gd.listarComboBox(cp));
@@ -1925,6 +1969,30 @@ public class TelaPrincipal extends JFrame {
 
 				panelLayoutMesa.setVisible(true);
 				panelMesas.setVisible(false);
+				try {
+					table.setModel(gd.geraTabela(MesasBean.class, new String[] {"Mesa", "Ocupada", "Comanda Aberta", "Valor"}, new String[] {"idMesa", "usoMesa", "comandaPendente", "valorMesa"}));
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchMethodException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvocationTargetException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 
 			}
 		});
@@ -1943,13 +2011,105 @@ public class TelaPrincipal extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				DefaultTableModel exibirDados = new DefaultTableModel();
+				table_3.setModel(exibirDados);
 				panelListagemMesas.setVisible(true);
 				panelMesas.setVisible(false);
+				
+				try {
+					table_2.setModel(gd.geraTabela(MesasBean.class, new String[] {"Mesa", "Ocupada", "Comanda Aberta", "Valor"}, new String[] {"idMesa", "usoMesa", "comandaPendente", "valorMesa"}));
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchMethodException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvocationTargetException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				
 
 			}
 		});
+		
+		table_2.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				try {
+					table_3.setModel(gd.listaMesa(table_2.getSelectedRow()+1,  new String[] {"idComanda","Produto", "Quantidade", "Valor Unidade","Total", "Produzido"}, new String[] {"idProduto","quantidadeComanda","valorUnidadeComanda", "valorTotalComanda","emitidaComanda","check"}));
+				    
+					TableColumn tc = table_3.getColumnModel().getColumn(6);
+					TableColumn tcid = table_3.getColumnModel().getColumn(0);
+					tcid.setMinWidth(0);
+					tcid.setMaxWidth(0);
+				    tc.setCellEditor(table_3.getDefaultEditor(Boolean.class));
+				    tc.setCellRenderer(table_3.getDefaultRenderer(Boolean.class));
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchMethodException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvocationTargetException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+				System.out.println(table_2.getSelectedRow());
+				
+			}
+		});
+
 
 		/* Painel Ação Caixa */
 
