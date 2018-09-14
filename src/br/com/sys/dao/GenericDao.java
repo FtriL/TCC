@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sound.midi.Soundbank;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
@@ -30,7 +31,7 @@ public class GenericDao {
 	
 	//Construtor
 	public GenericDao() {
-		//this.conexao = new ConnectionFactory().obterConexao();
+		this.conexao = new ConnectionFactory().obterConexao();
 	}
 	
 	public void adicionar(Object obj) throws ClassNotFoundException, IllegalArgumentException, IllegalAccessException  {
@@ -118,17 +119,19 @@ public class GenericDao {
                         args1[0] = String.class;
                         obj.getClass().getMethod(m.getName(),
                                 args1).invoke(obj, rset.getString(s));
-                    }
-
-                    if (pvec[0].getName().equals("int")) {
+                    }else if (pvec[0].getName().equals("int")) {
                         args1[0] = int.class;
                         obj.getClass().getMethod(m.getName(),
                                 args1).invoke(obj, rset.getInt(s));
-                    }
-                    if (pvec[0].getName().equals("double")) {
+                    }else if (pvec[0].getName().equals("double")) {
                         args1[0] = double.class;
                         obj.getClass().getMethod(m.getName(),
                                 args1).invoke(obj, rset.getDouble(s));
+                    }else if (pvec[0].getName().equalsIgnoreCase("[B")) {
+                    	System.out.println("Byte "+pvec[0].getName());
+                        args1[0] = byte.class;
+                        obj.getClass().getMethod(m.getName(),
+                                args1).invoke(obj, rset.getBinaryStream(s));
                     }
                 }
             }
@@ -247,7 +250,6 @@ public class GenericDao {
 	    	if(x>colunas.length-1) {
 	    		canEd[x]=true;
 	    	}else{
-	    		System.out.println(x);
 		    	if((colunas[x].length()>9)) {
 		    		if(colunas[x].substring(0, 10).equals("Quantidade")){
 		    			canEd[x]=true;
@@ -295,6 +297,7 @@ public class GenericDao {
 							if(pb.getIdPedido()==pc.getIdPedido()){
 
 								if(pb.getFechadoPedido()==0) {
+									System.out.println(pb.getIdPedido()+"Pedido passo"+pb.getFechadoPedido());
 									for(int x = 0; x<colunas.length; x++) {
 										if(x==0){
 											linhas[x]=""+cb.getIdComanda();
@@ -302,8 +305,7 @@ public class GenericDao {
 											linhas[x]=selecionadado("Produto", "idProduto", cb.getIdProduto(), 2);
 										}else if(x==2) {
 											linhas[x]=""+cb.getQuantidadeComanda();
-										}
-										else if(x==3) {
+										}else if(x==3) {
 											linhas[x]=String.format("%.2f",cb.getValorUnidadeComanda());														}
 										else if(x==4) {
 											linhas[x]=String.format("%.2f",cb.getValorTotalComanda());
@@ -318,6 +320,7 @@ public class GenericDao {
 										}
 
 									}
+									exibirDados.addRow(linhas);
 								}
 								
 							}
@@ -327,12 +330,7 @@ public class GenericDao {
 				}
 	
 			}
-			
-			exibirDados.addRow(linhas);
 
-			
-
-	
 		}
 
 		if(dados[dados.length-1].equals("check")) {
@@ -459,3 +457,30 @@ public class GenericDao {
     }
 
 }
+
+
+
+
+/*recuperar imagem
+
+InputStream input = resultSet.getBinaryStream("coluna_imagem");
+if(input != null){
+   ByteArrayOutputStream output = new ByteArrayOutputStream();
+   // set read buffer size
+   byte[] rb = new byte[1024];
+   int ch = 0;
+   while ((ch = input.read(rb)) != -1){	
+       output.write(rb, 0, ch);
+   }
+   // transfer to byte buffer
+   byte[] b = output.toByteArray();
+   input.close();
+   output.close();
+   // onde o método setImagem espera um array de bytes
+   umObjeto.setImagem(b);    
+   
+   email  = DBdesigner == lfrancisco366@gmail.com                 
+   senha  = DBdesigner == 56737879887
+   
+}
+*/

@@ -8,13 +8,21 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -36,6 +44,7 @@ import br.com.sys.bean.ClientesBean;
 import br.com.sys.bean.ComandasBean;
 import br.com.sys.bean.EnderecosBean;
 import br.com.sys.bean.MesasBean;
+import br.com.sys.bean.Pedidos_comandasBean;
 import br.com.sys.bean.ProdutosBean;
 import br.com.sys.dao.GenericDao;
 
@@ -53,13 +62,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JCheckBox;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.border.LineBorder;
 
 public class TelaPrincipal extends JFrame {
 
 	private JPanel contentPane, panelLayoutMesa, panelFecharMesa, panelMesas, panelCardapio, panelCaixa, panelClientes, panelAlterarFuncionarios,
 			panelFuncionarios, panelFecharCaixa, panelAlterarProdutos, panelAlterarClientes;
 	private JLabel label_5, label_6, labelSelecioneMesa, lblImagemProduto, lblCategoria, lblAlteracaoDeProdutos,
-			lblValorProduto;
+			lblValorProduto, lblImagemProdutoA;
 	private JButton btnLayout, btnListagemMESAS, BotaoMesa1, BotaoMesa2, BotaoMesa3, BotaoMesa4, BotaoMesa5, BotaoMesa6,
 			BotaoMesa7, BotaoMesa8, BotaoMesa9, BotaoMesa10, BotaoMesa11, BotaoMesa12, BotaoMesa13, BotaoMesa14,
 			BotaoMesa15, btnAlterao, btnAlteraoALTERACAO, btnAlteraoCLIENTES, btnCadastro, btnCadastroCARDAPIO,
@@ -73,6 +83,7 @@ public class TelaPrincipal extends JFrame {
 	private JFormattedTextField formattedTextField;
 	private JTextField textField;
 	private JButton btnAdicionarImagem;
+	private JButton btnAdicionarImagemA;
 	private JComboBox comboBox_2;
 	private JTable table;
 	private JTable tabelaFuncionarios;
@@ -134,6 +145,7 @@ public class TelaPrincipal extends JFrame {
 	private JButton btnAlterar_1;
 	private JTextField textFieldNomeClienteA;
 	private JTextField textFieldFidelidadeA;
+	private File file;
 
 	/**
 	 * Launch the application.
@@ -176,9 +188,12 @@ public class TelaPrincipal extends JFrame {
 		panelCadastrarProduto.setBackground(new Color(245, 222, 179));
 		panelCadastrarProduto.setLayout(null);
 
-		lblImagemProduto = new JLabel("");
-		lblImagemProduto.setBackground(Color.WHITE);
-		lblImagemProduto.setBounds(418, 272, 169, 115);
+		lblImagemProduto = new JLabel("      360 X 240");
+		lblImagemProduto.setBorder(new LineBorder(new Color(0, 0, 0), 2));
+		lblImagemProduto.setForeground(Color.BLACK);
+		lblImagemProduto.setFont(new Font("Tahoma", Font.ITALIC, 18));
+		lblImagemProduto.setBackground(Color.BLACK);
+		lblImagemProduto.setBounds(418, 272, 180, 120);
 		panelCadastrarProduto.add(lblImagemProduto);
 
 		JLabel lblCadastroDeProdutos = new JLabel("CADASTRO DE PRODUTOS");
@@ -199,8 +214,9 @@ public class TelaPrincipal extends JFrame {
 		campoNomeProduto.setColumns(10);
 
 		lblValorProduto = new JLabel("Valor Produto:");
+		lblValorProduto.setFocusTraversalPolicyProvider(true);
 		lblValorProduto.setFont(new Font("Agency FB", Font.PLAIN, 30));
-		lblValorProduto.setBackground(new Color(184, 134, 11));
+		lblValorProduto.setBackground(Color.DARK_GRAY);
 		lblValorProduto.setBounds(385, 112, 141, 56);
 		panelCadastrarProduto.add(lblValorProduto);
 
@@ -260,8 +276,17 @@ public class TelaPrincipal extends JFrame {
 				pb.setValorProduto(Double.parseDouble(formattedTextField.getText().replaceAll(",", ".")));
 				pb.setDescricaoProduto(descricaoProduto.getText());
 				pb.setIdCategoria(comboBox.getSelectedIndex());
+				byte[] bFile = new byte[(int) file.length()];
+				
 				try {
+					FileInputStream fileInputStream = new FileInputStream(file);
+					 fileInputStream.read(bFile);
+					 fileInputStream.close();
+					 pb.setImgProduto(bFile);
 					gd.adicionar(pb);
+					
+
+					
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -269,6 +294,12 @@ public class TelaPrincipal extends JFrame {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -309,6 +340,29 @@ public class TelaPrincipal extends JFrame {
 		btnAdicionarImagem = new JButton("+");
 		btnAdicionarImagem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+
+				BufferedImage conteudo = null;
+		        String caminho = null;
+		        try {
+		            JFileChooser jFileChooser = new JFileChooser();
+		            int ok = jFileChooser.showOpenDialog(null);
+		            if (ok == JFileChooser.APPROVE_OPTION) {
+		                caminho = jFileChooser.getCurrentDirectory().getPath();
+		                caminho +=  "\\";
+		                caminho	+= jFileChooser.getSelectedFile().getName(); // caminho do arquivo"
+		                System.out.println(caminho);
+		                file = new File(caminho);
+		                conteudo = ImageIO.read(new URL("file:/"+caminho));
+		                //System.out.println(conteudo);
+		            } else {
+		                jFileChooser.cancelSelection();
+		            }
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+		        ImageIcon img = new ImageIcon(conteudo.getScaledInstance(conteudo.getWidth()/2, conteudo.getHeight()/2, java.awt.Image.SCALE_SMOOTH));
+				lblImagemProduto.setIcon(img);
+				lblImagemProduto.setText("");
 				
 			}
 		});
@@ -382,6 +436,12 @@ public class TelaPrincipal extends JFrame {
 					valorAlterarProduto.setText(String.format("%.2f",pb.getValorProduto()));
 					comboBox_2.setSelectedIndex(pb.getIdCategoria()+1);
 					
+					InputStream in = new ByteArrayInputStream(pb.getImgProduto());
+					System.out.println(pb.getImgProduto());
+					BufferedImage img = ImageIO.read(in);
+					lblImagemProdutoA.setIcon(new ImageIcon(img.getScaledInstance(img.getWidth()/2, img.getHeight()/2, java.awt.Image.SCALE_SMOOTH)));
+					
+					
 					
 				} catch (IllegalAccessException e1) {
 					// TODO Auto-generated catch block
@@ -404,6 +464,9 @@ public class TelaPrincipal extends JFrame {
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 				
 
@@ -419,10 +482,10 @@ public class TelaPrincipal extends JFrame {
 		panelAlterarProdutos.setBackground(new Color(245, 222, 179));
 		panelAlterarProdutos.setLayout(null);
 
-		lblImagemProduto = new JLabel("");
-		lblImagemProduto.setBackground(Color.WHITE);
-		lblImagemProduto.setBounds(548, 272, 169, 115);
-		panelAlterarProdutos.add(lblImagemProduto);
+		lblImagemProdutoA = new JLabel("");
+		lblImagemProdutoA.setBackground(Color.WHITE);
+		lblImagemProdutoA.setBounds(548, 272, 180, 120);
+		panelAlterarProdutos.add(lblImagemProdutoA);
 
 		lblAlteracaoDeProdutos = new JLabel("ALTERA\u00C7\u00C3O DE PRODUTOS");
 		lblAlteracaoDeProdutos.setFont(new Font("Agency FB", Font.PLAIN, 38));
@@ -547,15 +610,15 @@ public class TelaPrincipal extends JFrame {
 		});
 		panelAlterarProdutos.add(btnCancelar);
 
-		btnAdicionarImagem = new JButton("+");
-		btnAdicionarImagem.setForeground(Color.WHITE);
-		btnAdicionarImagem.setFont(new Font("Agency FB", Font.PLAIN, 30));
-		btnAdicionarImagem.setFocusable(false);
-		btnAdicionarImagem.setFocusTraversalKeysEnabled(false);
-		btnAdicionarImagem.setFocusPainted(false);
-		btnAdicionarImagem.setBackground(new Color(139, 69, 19));
-		btnAdicionarImagem.setBounds(385, 331, 51, 56);
-		panelAlterarProdutos.add(btnAdicionarImagem);
+		btnAdicionarImagemA = new JButton("+");
+		btnAdicionarImagemA.setForeground(Color.WHITE);
+		btnAdicionarImagemA.setFont(new Font("Agency FB", Font.PLAIN, 30));
+		btnAdicionarImagemA.setFocusable(false);
+		btnAdicionarImagemA.setFocusTraversalKeysEnabled(false);
+		btnAdicionarImagemA.setFocusPainted(false);
+		btnAdicionarImagemA.setBackground(new Color(139, 69, 19));
+		btnAdicionarImagemA.setBounds(385, 331, 51, 56);
+		panelAlterarProdutos.add(btnAdicionarImagemA);
 
 		lblImagem = new JLabel("Imagem:");
 		lblImagem.setFont(new Font("Agency FB", Font.PLAIN, 30));
@@ -766,29 +829,85 @@ public class TelaPrincipal extends JFrame {
 		JButton btnExcluirIten = new JButton("Excluir");
 		btnExcluirIten.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ComandasBean cb = new ComandasBean();
-				
-				
-				 for(int i = 0; i < table_3.getModel().getRowCount(); i++){
-			            Boolean selecionado =  (Boolean) table_3.getModel().getValueAt(i, 5);
+		
+				int resposta = JOptionPane.showConfirmDialog(null, "Deseja realmente excluir?", "Excluir itens da mesa", JOptionPane.YES_NO_OPTION);
+
+				if (resposta == JOptionPane.YES_OPTION) {
+					 for(int i = 0; i < table_3.getModel().getRowCount(); i++){
+				          Boolean selecionado =  (Boolean) table_3.getModel().getValueAt(i, 6);
 			              if(selecionado==true) {
-			                System.out.println("marcado "+i);
-			              }else {
-			            	  System.out.println("Desmarcado "+i);
+			            	  ComandasBean cb = new ComandasBean();
+			            	  cb.setIdComanda(Integer.parseInt(table_3.getModel().getValueAt(i, 0).toString()));
+			            	  try {
+			            		 List<Object> lista = gd.listarTabela(Pedidos_comandasBean.class);
+			            		 for (Object o : lista) {
+			            			 Pedidos_comandasBean pc = (Pedidos_comandasBean) o;
+			            			 if(pc.getIdComanda()==cb.getIdComanda()) {
+			            				 gd.excluir(pc);
+			            			 }
+								}
+								gd.excluir(cb);
+							} catch (ClassNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (NoSuchFieldException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (SQLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (NoSuchMethodException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalArgumentException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (InvocationTargetException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (InstantiationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 			              }
 			          }
-				/*try {
-					gd.excluir(cb);
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchFieldException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}*/
+						try {
+							table_3.setModel(gd.listaMesa(table_2.getSelectedRow()+1,  new String[] {"idComanda","Produto", "Quantidade", "Valor Unidade","Total", "Produzido"}, new String[] {"oculto", "idProduto","quantidadeComanda","valorUnidadeComanda", "valorTotalComanda","emitidaComanda","check"}));
+							TableColumn tc = table_3.getColumnModel().getColumn(6);
+							TableColumn tcid = table_3.getColumnModel().getColumn(0);
+							tcid.setMinWidth(0);
+							tcid.setMaxWidth(0);
+						    tc.setCellEditor(table_3.getDefaultEditor(Boolean.class));
+						    tc.setCellRenderer(table_3.getDefaultRenderer(Boolean.class));
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (NoSuchMethodException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InvocationTargetException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InstantiationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					    
+
+					 
+				}
 				
 			}
 		});
@@ -2213,7 +2332,7 @@ public class TelaPrincipal extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				try {
-					table_3.setModel(gd.listaMesa(table_2.getSelectedRow()+1,  new String[] {"idComanda","Produto", "Quantidade", "Valor Unidade","Total", "Produzido"}, new String[] {"idProduto","quantidadeComanda","valorUnidadeComanda", "valorTotalComanda","emitidaComanda","check"}));
+					table_3.setModel(gd.listaMesa(table_2.getSelectedRow()+1,  new String[] {"idComanda","Produto", "Quantidade", "Valor Unidade","Total", "Produzido"}, new String[] {"oculto", "idProduto","quantidadeComanda","valorUnidadeComanda", "valorTotalComanda","emitidaComanda","check"}));
 				    
 					TableColumn tc = table_3.getColumnModel().getColumn(6);
 					TableColumn tcid = table_3.getColumnModel().getColumn(0);

@@ -4,8 +4,15 @@ public class ProdutosBean {
 	private int idProduto;
 	private String nomeProduto;
 	private String descricaoProduto;
+	public byte[] getImgProduto() {
+		return imgProduto;
+	}
+	public void setImgProduto(byte[] imgProduto) {
+		this.imgProduto = imgProduto;
+	}
 	private double valorProduto;
 	private int idCategoria;
+	private byte[] imgProduto;
 	public int getIdProduto() {
 		return idProduto;
 	}
