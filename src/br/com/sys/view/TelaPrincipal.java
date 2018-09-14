@@ -32,7 +32,9 @@ import javax.swing.text.MaskFormatter;
 import javax.swing.text.NumberFormatter;
 
 import br.com.sys.bean.CategoriasBean;
+import br.com.sys.bean.ClientesBean;
 import br.com.sys.bean.ComandasBean;
+import br.com.sys.bean.EnderecosBean;
 import br.com.sys.bean.MesasBean;
 import br.com.sys.bean.ProdutosBean;
 import br.com.sys.dao.GenericDao;
@@ -111,19 +113,27 @@ public class TelaPrincipal extends JFrame {
 	private JLabel lblCpfFuncionarios;
 	private JTextField textFieldNomeFuncionario;
 	private JTextField textFieldEndereco;
+	private JTextField textFieldEnderecoA;
 	private JTextField textFieldBairro;
+	private JTextField textFieldBairroA;
 	private JTextField textFieldCidade;
+	private JTextField textFieldCidadeA;
 	private JTextField textFieldNumero;
+	private JTextField textFieldNumeroA;
 	private JFormattedTextField FormattedEstado;
+	private JFormattedTextField FormattedEstadoA;
 	private JFormattedTextField FormattedCPF;
+	private JFormattedTextField FormattedCPFA;
 	private JLabel labelAvisoProblema;
 	private JButton btnAlterarFuncionarios;
 	private JButton btnCancelarCadastroFuncionarios;
 	private JLabel labelTelefone;
 	private JFormattedTextField FormattedTelefone;
 	private GenericDao gd = new GenericDao();
-	private int alterar = 0;
+	private int alterar = 0, alterarCliente = 0, alterarClienteIdEndereco = 0;
 	private JButton btnAlterar_1;
+	private JTextField textFieldNomeClienteA;
+	private JTextField textFieldFidelidadeA;
 
 	/**
 	 * Launch the application.
@@ -1331,6 +1341,54 @@ public class TelaPrincipal extends JFrame {
 		panelCadastroCliente.add(FormattedCPF);
 
 		JButton btnCadastrar = new JButton("CADASTRAR");
+		btnCadastrar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				//chamar função para verificar cpf aqui antes de adicionar os dados no banco
+				EnderecosBean eb = new EnderecosBean();
+				eb.setBairro(textFieldCidade.getText());
+				eb.setComplemento(textFieldNumero.getText());
+				eb.setCidade(textFieldCidade.getText());
+				eb.setEstado(FormattedEstado.getText());
+				eb.setRua(textFieldEndereco.getText());
+				try {
+					gd.adicionar(eb);
+					List<Object> lista = gd.listarTabela(EnderecosBean.class);
+					EnderecosBean eb2 = (EnderecosBean) lista.get(lista.size()-1);
+					ClientesBean cb = new ClientesBean();
+					cb.setIdEndereco(eb2.getIdEndereco());
+					
+					cb.setCpf(FormattedCPF.getText());
+					cb.setNomeCliente(textFieldNomeCliente.getText());
+					cb.setPontuacaoFidelidade(0);
+					gd.adicionar(cb);
+					
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+				
+			}
+		});
 		btnCadastrar.setForeground(new Color(255, 255, 255));
 		btnCadastrar.setBackground(new Color(139, 69, 19));
 		btnCadastrar.setFont(new Font("Agency FB", Font.PLAIN, 30));
@@ -1398,6 +1456,54 @@ public class TelaPrincipal extends JFrame {
 
 				panelListagemClientes.setVisible(false);
 				panelAlterarClientes.setVisible(true);
+				alterarCliente = tabelaClientes.getSelectedRow();
+
+				List<Object> lista;
+				
+					try {
+						lista = gd.listarTabela(ClientesBean.class);
+						ClientesBean cb = (ClientesBean) lista.get(alterarCliente);
+						textFieldNomeClienteA.setText(cb.getNomeCliente());
+						FormattedCPFA.setText(cb.getCpf());
+						FormattedCPFA.setEnabled(false);
+						List<Object> l = gd.listarTabela(EnderecosBean.class);
+						for (Object o : l) {
+							EnderecosBean eb = (EnderecosBean) o;
+							if(eb.getIdEndereco()==cb.getIdEndereco()) {
+								textFieldBairroA.setText(eb.getBairro());
+								textFieldCidadeA.setText(eb.getCidade());
+								textFieldEnderecoA.setText(eb.getRua());
+								textFieldNumeroA.setText(eb.getComplemento());
+								FormattedEstadoA.setText(eb.getEstado());
+
+								alterarClienteIdEndereco = eb.getIdEndereco();
+							}
+						}
+					} catch (IllegalAccessException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (NoSuchMethodException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IllegalArgumentException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (InvocationTargetException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (InstantiationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (ClassNotFoundException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+
+
 				
 
 			}
@@ -1463,53 +1569,86 @@ public class TelaPrincipal extends JFrame {
 		labelAvisoProblema.setBounds(10, 318, 443, 50);
 		panelAlterarClientes.add(labelAvisoProblema);
 
-		textFieldNomeCliente = new JTextField();
-		textFieldNomeCliente.setFont(new Font("Agency FB", Font.PLAIN, 22));
-		textFieldNomeCliente.setBounds(108, 70, 337, 36);
-		panelAlterarClientes.add(textFieldNomeCliente);
-		textFieldNomeCliente.setColumns(10);
+		textFieldNomeClienteA = new JTextField();
+		textFieldNomeClienteA.setFont(new Font("Agency FB", Font.PLAIN, 22));
+		textFieldNomeClienteA.setBounds(108, 70, 337, 36);
+		panelAlterarClientes.add(textFieldNomeClienteA);
+		textFieldNomeClienteA.setColumns(10);
 
-		textFieldEndereco = new JTextField();
-		textFieldEndereco.setFont(new Font("Agency FB", Font.PLAIN, 22));
-		textFieldEndereco.setColumns(10);
-		textFieldEndereco.setBounds(85, 130, 451, 36);
-		panelAlterarClientes.add(textFieldEndereco);
+		textFieldEnderecoA = new JTextField();
+		textFieldEnderecoA.setFont(new Font("Agency FB", Font.PLAIN, 22));
+		textFieldEnderecoA.setColumns(10);
+		textFieldEnderecoA.setBounds(85, 130, 451, 36);
+		panelAlterarClientes.add(textFieldEnderecoA);
 
-		textFieldBairro = new JTextField();
-		textFieldBairro.setFont(new Font("Agency FB", Font.PLAIN, 22));
-		textFieldBairro.setColumns(10);
-		textFieldBairro.setBounds(66, 190, 157, 36);
-		panelAlterarClientes.add(textFieldBairro);
+		textFieldBairroA = new JTextField();
+		textFieldBairroA.setFont(new Font("Agency FB", Font.PLAIN, 22));
+		textFieldBairroA.setColumns(10);
+		textFieldBairroA.setBounds(66, 190, 157, 36);
+		panelAlterarClientes.add(textFieldBairroA);
 
-		textFieldCidade = new JTextField();
-		textFieldCidade.setFont(new Font("Agency FB", Font.PLAIN, 22));
-		textFieldCidade.setColumns(10);
-		textFieldCidade.setBounds(356, 190, 157, 36);
-		panelAlterarClientes.add(textFieldCidade);
+		textFieldCidadeA = new JTextField();
+		textFieldCidadeA.setFont(new Font("Agency FB", Font.PLAIN, 22));
+		textFieldCidadeA.setColumns(10);
+		textFieldCidadeA.setBounds(356, 190, 157, 36);
+		panelAlterarClientes.add(textFieldCidadeA);
 
-		textFieldNumero = new JTextField();
-		textFieldNumero.setFont(new Font("Agency FB", Font.PLAIN, 22));
-		textFieldNumero.setColumns(10);
-		textFieldNumero.setBounds(594, 130, 70, 36);
-		panelAlterarClientes.add(textFieldNumero);
+		textFieldNumeroA = new JTextField();
+		textFieldNumeroA.setFont(new Font("Agency FB", Font.PLAIN, 22));
+		textFieldNumeroA.setColumns(10);
+		textFieldNumeroA.setBounds(594, 130, 70, 36);
+		panelAlterarClientes.add(textFieldNumeroA);
 
-		textFieldFidelidade = new JTextField();
-		textFieldFidelidade.setFont(new Font("Agency FB", Font.PLAIN, 22));
-		textFieldFidelidade.setColumns(10);
-		textFieldFidelidade.setBounds(396, 253, 70, 36);
-		panelAlterarClientes.add(textFieldFidelidade);
+		textFieldFidelidadeA = new JTextField();
+		textFieldFidelidadeA.setFont(new Font("Agency FB", Font.PLAIN, 22));
+		textFieldFidelidadeA.setColumns(10);
+		textFieldFidelidadeA.setBounds(396, 253, 70, 36);
+		panelAlterarClientes.add(textFieldFidelidadeA);
 
-		FormattedEstado = new JFormattedTextField();
-		FormattedEstado.setFont(new Font("Agency FB", Font.PLAIN, 22));
-		FormattedEstado.setBounds(605, 190, 59, 36);
-		panelAlterarClientes.add(FormattedEstado);
+		FormattedEstadoA = new JFormattedTextField();
+		FormattedEstadoA.setFont(new Font("Agency FB", Font.PLAIN, 22));
+		FormattedEstadoA.setBounds(605, 190, 59, 36);
+		panelAlterarClientes.add(FormattedEstadoA);
 
-		FormattedCPF = new JFormattedTextField();
-		FormattedCPF.setFont(new Font("Agency FB", Font.PLAIN, 22));
-		FormattedCPF.setBounds(48, 248, 175, 36);
-		panelAlterarClientes.add(FormattedCPF);
+		FormattedCPFA = new JFormattedTextField();
+		FormattedCPFA.setFont(new Font("Agency FB", Font.PLAIN, 22));
+		FormattedCPFA.setBounds(48, 248, 175, 36);
+		panelAlterarClientes.add(FormattedCPFA);
 
 		JButton btnAlterarCliente = new JButton("ALTERAR");
+		btnAlterarCliente.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				EnderecosBean eb = new EnderecosBean();
+				eb.setBairro(textFieldBairroA.getText());
+				eb.setCidade(textFieldCidadeA.getText());
+				eb.setComplemento(textFieldNumeroA.getText());
+				eb.setEstado(FormattedEstadoA.getText());
+				eb.setRua(textFieldEnderecoA.getText());
+				ClientesBean cb = new ClientesBean();
+				cb.setCpf(FormattedCPFA.getText());
+				cb.setIdEndereco(alterarClienteIdEndereco);
+				cb.setNomeCliente(textFieldNomeClienteA.getText());
+				try {
+					gd.alterar(eb);
+					gd.alterar(cb);
+					
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+			}
+		});
 		btnAlterarCliente.setForeground(new Color(255, 255, 255));
 		btnAlterarCliente.setBackground(new Color(139, 69, 19));
 		btnAlterarCliente.setFont(new Font("Agency FB", Font.PLAIN, 30));

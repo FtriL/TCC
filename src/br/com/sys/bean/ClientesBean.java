@@ -4,7 +4,6 @@ public class ClientesBean {
 	private int idCliente;
 	private String nomeCliente;
 	private int idEndereco;
-	private String telefone;
 	private String cpf;
 	private int pontuacaoFidelidade;
 	public int getIdCliente() {
@@ -24,12 +23,6 @@ public class ClientesBean {
 	}
 	public void setIdEndereco(int idEndereco) {
 		this.idEndereco = idEndereco;
-	}
-	public String getTelefone() {
-		return telefone;
-	}
-	public void setTelefone(String telefone) {
-		this.telefone = telefone;
 	}
 	public String getCpf() {
 		return cpf;

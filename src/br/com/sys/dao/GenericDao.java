@@ -30,7 +30,7 @@ public class GenericDao {
 	
 	//Construtor
 	public GenericDao() {
-		this.conexao = new ConnectionFactory().obterConexao();
+		//this.conexao = new ConnectionFactory().obterConexao();
 	}
 	
 	public void adicionar(Object obj) throws ClassNotFoundException, IllegalArgumentException, IllegalAccessException  {
