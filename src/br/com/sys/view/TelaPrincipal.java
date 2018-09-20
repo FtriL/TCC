@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -276,15 +277,22 @@ public class TelaPrincipal extends JFrame {
 				pb.setValorProduto(Double.parseDouble(formattedTextField.getText().replaceAll(",", ".")));
 				pb.setDescricaoProduto(descricaoProduto.getText());
 				pb.setIdCategoria(comboBox.getSelectedIndex());
-				byte[] bFile = new byte[(int) file.length()];
 				
 				try {
-					FileInputStream fileInputStream = new FileInputStream(file);
-					 fileInputStream.read(bFile);
-					 fileInputStream.close();
-					 pb.setImgProduto(bFile);
+					BufferedImage img = ImageIO.read(file);
+					ByteArrayOutputStream bytesImg = new ByteArrayOutputStream();
+					ImageIO.write((BufferedImage)img, "jpg", bytesImg);
+					bytesImg.flush();
+					byte[] byteArray = bytesImg.toByteArray();
+					bytesImg.close();
+					InputStream fis = new FileInputStream(file);
+					pb.setImgProduto(fis);
+					System.out.println(fis);
 					gd.adicionar(pb);
-					
+					List<Object> lista = gd.listarTabela(ProdutosBean.class);
+					//ProdutosBean pb2 = (ProdutosBean) lista.get(lista.size()-1);
+					//gd.gravaIMG(pb2);
+				
 
 					
 				} catch (ClassNotFoundException e) {
@@ -300,6 +308,18 @@ public class TelaPrincipal extends JFrame {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -352,7 +372,7 @@ public class TelaPrincipal extends JFrame {
 		                caminho	+= jFileChooser.getSelectedFile().getName(); // caminho do arquivo"
 		                System.out.println(caminho);
 		                file = new File(caminho);
-		                conteudo = ImageIO.read(new URL("file:/"+caminho));
+		                conteudo = ImageIO.read(file);
 		                //System.out.println(conteudo);
 		            } else {
 		                jFileChooser.cancelSelection();
@@ -429,15 +449,14 @@ public class TelaPrincipal extends JFrame {
 					CategoriasBean cb = new CategoriasBean();
 					comboBox_2.setModel(gd.listarComboBox(cb));
 					List<Object> list = gd.listarTabela(ProdutosBean.class);
-					ProdutosBean pb = (ProdutosBean) list.get(table_1.getSelectedRow()-1);
+					ProdutosBean pb = (ProdutosBean) list.get(table_1.getSelectedRow());
 					campoNomeProdutoalterar.setText(pb.getNomeProduto());
 					alterar = pb.getIdProduto();
 					descricaoProdutoalterar.setText(pb.getDescricaoProduto());
 					valorAlterarProduto.setText(String.format("%.2f",pb.getValorProduto()));
-					comboBox_2.setSelectedIndex(pb.getIdCategoria()+1);
-					
-					InputStream in = new ByteArrayInputStream(pb.getImgProduto());
-					System.out.println(pb.getImgProduto());
+					comboBox_2.setSelectedIndex(pb.getIdCategoria());
+					gd.img(pb.getIdProduto(), lblImagemProdutoA);
+					InputStream in = pb.getImgProduto();
 					BufferedImage img = ImageIO.read(in);
 					lblImagemProdutoA.setIcon(new ImageIcon(img.getScaledInstance(img.getWidth()/2, img.getHeight()/2, java.awt.Image.SCALE_SMOOTH)));
 					
@@ -871,6 +890,9 @@ public class TelaPrincipal extends JFrame {
 							} catch (InstantiationException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
 			              }
 			          }
@@ -901,6 +923,9 @@ public class TelaPrincipal extends JFrame {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
@@ -1502,6 +1527,9 @@ public class TelaPrincipal extends JFrame {
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				
 				
@@ -1617,6 +1645,9 @@ public class TelaPrincipal extends JFrame {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
@@ -2150,8 +2181,7 @@ public class TelaPrincipal extends JFrame {
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}
-
+				} 
 			}
 		});
 
@@ -2193,6 +2223,9 @@ public class TelaPrincipal extends JFrame {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
@@ -2250,6 +2283,9 @@ public class TelaPrincipal extends JFrame {
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 
 			}
@@ -2295,6 +2331,9 @@ public class TelaPrincipal extends JFrame {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
@@ -2359,6 +2398,9 @@ public class TelaPrincipal extends JFrame {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}

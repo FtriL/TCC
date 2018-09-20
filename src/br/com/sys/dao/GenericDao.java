@@ -1,5 +1,11 @@
 package br.com.sys.dao;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,14 +19,18 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.sound.midi.Soundbank;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.TableView.TableRow;
 
 import br.com.sys.bean.ComandasBean;
 import br.com.sys.bean.Pedidos_comandasBean;
+import br.com.sys.bean.ProdutosBean;
 import br.com.sys.bean.PedidosBean;
 import br.com.sys.connection.ConnectionFactory;
 
@@ -41,14 +51,20 @@ public class GenericDao {
         Class cls = Class.forName(classe);
         System.out.println("classe"+classe);
         System.out.println("cls"+cls);
+        boolean dadoimg = false;
         Field listaAtributos[] = cls.getDeclaredFields();
-        String valorIncluir = "";
-        String tipoDado;
+
         for (int i = 1; i < listaAtributos.length; i++) {
         Field fld = listaAtributos[i];
         fld.setAccessible(true);
-        campos = campos + fld.getName() + ", ";
-        dados = dados + "'" + fld.get(obj) + "'" + ",";
+        if(fld.getName().equalsIgnoreCase("imgProduto")) {
+        	campos = campos + fld.getName() + ", ";
+	        dados = dados + "?" + ",";
+	        dadoimg = true;
+        }else {
+	        campos = campos + fld.getName() + ", ";
+	        dados = dados + "'" + fld.get(obj) + "'" + ",";
+	        }
         }
         campos = campos.substring(0, campos.length() - 2);
         String tabela = cls.getSimpleName();
@@ -59,6 +75,11 @@ public class GenericDao {
         + dados + ")";
         try (PreparedStatement stmt = conexao.prepareStatement(sql)) {
             System.out.println(sql);
+            if(dadoimg == true) {
+           ProdutosBean pb = (ProdutosBean) obj;
+            	stmt.setBinaryStream(1, pb.getImgProduto());
+            	System.out.println("Entrou aqui "+pb.getNomeProduto());
+            }
         stmt.execute();
         } catch (SQLException ex) {
             Logger.getLogger(GenericDao.class.getName()).log(Level.SEVERE, null, ex);
@@ -90,12 +111,59 @@ public class GenericDao {
 		return list;
 	
 	}
+    public void gravaIMG(ProdutosBean pb) throws SQLException {
+    	String sql = "UPDATE Produtos SET imgProduto = ? WHERE idProduto = ?";
+    	PreparedStatement stmt  = this.conexao.prepareStatement(sql);
+
+        stmt.setBinaryStream(1, pb.getImgProduto());
+        stmt.setInt(2, pb.getIdProduto());
+        stmt.executeUpdate();
+        System.out.println("IMG Adicionada");
+        
+        
+    }
+    public void img(int id, JLabel jl) throws SQLException, IOException {
+    	String sql = "SELECT imgProduto FROM Produtos WHERE idProduto = ? ";
+    	PreparedStatement stmt  = this.conexao.prepareStatement(sql);
+        stmt.setInt(1, id);
+        ResultSet rset = stmt.executeQuery();
+        rset.last();
+        
+        
+	/*byte[] bFile = new byte[(int) file.length()];
+		
+		try {
+			FileInputStream fileInputStream = new FileInputStream(file);
+			 fileInputStream.read(bFile);
+			 fileInputStream.close();
+			 pb.setImgProduto(bFile);
+			 conteudo = ImageIO.read(file);*/
+        
+        InputStream input = rset.getBinaryStream("imgProduto");
+        ByteArrayOutputStream output = new ByteArrayOutputStream();  
+        // set read buffer size  
+
+        byte[] rb = new byte[1024];  
+        int ch = 0;  
+
+        while ((ch = input.read(rb)) != -1){   
+            output.write(rb, 0, ch);  
+        } 
+        byte[] b = output.toByteArray();  
+        InputStream in = new ByteArrayInputStream(b);
+		//System.out.println(pb.getImgProduto());
+		BufferedImage img = ImageIO.read(in);
+		ImageIcon nv = new ImageIcon(img);
+		jl.setIcon(nv);;
+        
+    	//eturn null;
+    }
 
     public List<Object> listarTabela(Class c)
             // public void listar(Class c)
             throws SQLException, IllegalAccessException, NoSuchMethodException,
             IllegalArgumentException, InvocationTargetException,
-            InstantiationException, ClassNotFoundException {
+            InstantiationException, ClassNotFoundException, IOException {
 
         List<Object> list = new ArrayList<Object>();
         String tabela = c.getSimpleName(); //Retorna o nome da classe
@@ -127,11 +195,14 @@ public class GenericDao {
                         args1[0] = double.class;
                         obj.getClass().getMethod(m.getName(),
                                 args1).invoke(obj, rset.getDouble(s));
-                    }else if (pvec[0].getName().equalsIgnoreCase("[B")) {
+                    }else if (m.getName().equalsIgnoreCase("setImgProduto")) {
                     	System.out.println("Byte "+pvec[0].getName());
-                        args1[0] = byte.class;
-                        obj.getClass().getMethod(m.getName(),
-                                args1).invoke(obj, rset.getBinaryStream(s));
+                        args1[0] = InputStream.class;
+
+                        InputStream input = rset.getBinaryStream(s);
+
+                        obj.getClass().getMethod("setImgProduto",args1[0] ).invoke(obj,input);
+                        
                     }
                 }
             }
@@ -145,7 +216,7 @@ public class GenericDao {
 
     }
     
-    public DefaultTableModel geraTabela(Class c, String[] colunas, String[] dados) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException, SQLException {
+    public DefaultTableModel geraTabela(Class c, String[] colunas, String[] dados) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException, SQLException, IOException {
 	    boolean[] canEd = new boolean [dados.length];  
 	    for(int x=0; x<dados.length; x++) {
 	    	if(x>colunas.length-1) {
@@ -198,8 +269,9 @@ public class GenericDao {
 	
 								System.out.println("-------");
 
-							
-								if((dados[x].substring(0,2).equalsIgnoreCase("id")&&(!dados[x].substring(2,dados[x].length()).equalsIgnoreCase("id")))) {
+								String name = obj.getClass().getSimpleName();
+								if((dados[x].substring(0,2).equalsIgnoreCase("id")&&(!dados[x].substring(2,dados[x].length()).equalsIgnoreCase(name.substring(0, name.length()-5))))) {
+									System.out.println("Mesas "+dados[x].substring(2,dados[x].length())+" e "+name.substring(0, name.length()-5));
 									linhas[x] = selecionadado(dados[x].substring(2, dados[x].length()), dados[x],Integer.parseInt(""+obj.getClass().getMethod(m.getName()).invoke(obj)), 2);
 		
 								}else if(m.getReturnType().getName().equals("double")) {
@@ -243,7 +315,7 @@ public class GenericDao {
 		
 		return exibirDados;
 	}
-    public DefaultTableModel listaMesa(int mesa, String[] colunas, String[] dados) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException, SQLException {
+    public DefaultTableModel listaMesa(int mesa, String[] colunas, String[] dados) throws IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, InstantiationException, ClassNotFoundException, SQLException, IOException {
 	    System.out.println("mesa"+mesa);
     	boolean[] canEd = new boolean [dados.length];  
 	    for(int x=0; x<dados.length; x++) {

@@ -1,18 +1,16 @@
 package br.com.sys.bean;
 
+
+import java.io.InputStream;
+
 public class ProdutosBean {
 	private int idProduto;
 	private String nomeProduto;
 	private String descricaoProduto;
-	public byte[] getImgProduto() {
-		return imgProduto;
-	}
-	public void setImgProduto(byte[] imgProduto) {
-		this.imgProduto = imgProduto;
-	}
 	private double valorProduto;
 	private int idCategoria;
-	private byte[] imgProduto;
+	private InputStream imgProduto;
+
 	public int getIdProduto() {
 		return idProduto;
 	}
@@ -30,6 +28,12 @@ public class ProdutosBean {
 	}
 	public void setDescricaoProduto(String descricaoProduto) {
 		this.descricaoProduto = descricaoProduto;
+	}
+	public InputStream getImgProduto() {
+		return imgProduto;
+	}
+	public void setImgProduto(InputStream imgProduto) {
+		this.imgProduto = imgProduto;
 	}
 	public double getValorProduto() {
 		return valorProduto;

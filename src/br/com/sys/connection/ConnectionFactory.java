@@ -10,7 +10,7 @@ import java.sql.SQLException;
 public class ConnectionFactory {
 
 	// Atributos
-	private final String url = "jdbc:mysql://localhost:3306/FtriL";
+	private final String url = "jdbc:mysql://localhost:3306/FtrL";
 	private final String user = "root";
 	private final String password = "";
 
