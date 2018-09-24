@@ -78,7 +78,6 @@ public class GenericDao {
             if(dadoimg == true) {
            ProdutosBean pb = (ProdutosBean) obj;
             	stmt.setBinaryStream(1, pb.getImgProduto());
-            	System.out.println("Entrou aqui "+pb.getNomeProduto());
             }
         stmt.execute();
         } catch (SQLException ex) {
@@ -128,16 +127,7 @@ public class GenericDao {
         stmt.setInt(1, id);
         ResultSet rset = stmt.executeQuery();
         rset.last();
-        
-        
-	/*byte[] bFile = new byte[(int) file.length()];
-		
-		try {
-			FileInputStream fileInputStream = new FileInputStream(file);
-			 fileInputStream.read(bFile);
-			 fileInputStream.close();
-			 pb.setImgProduto(bFile);
-			 conteudo = ImageIO.read(file);*/
+
         
         InputStream input = rset.getBinaryStream("imgProduto");
         ByteArrayOutputStream output = new ByteArrayOutputStream();  
@@ -222,7 +212,6 @@ public class GenericDao {
 	    	if(x>colunas.length-1) {
 	    		canEd[x]=true;
 	    	}else{
-	    		System.out.println(x);
 		    	if((colunas[x].length()>9)) {
 		    		if(colunas[x].substring(0, 10).equals("Quantidade")){
 		    			canEd[x]=true;
@@ -236,7 +225,6 @@ public class GenericDao {
 		    	}
 	    	}
 	    }
-	    System.out.println("aqui "+canEd[1]);
     	DefaultTableModel exibirDados = new DefaultTableModel(){    
 		    boolean[] canEdit = canEd;    
 		    @Override
@@ -248,7 +236,6 @@ public class GenericDao {
 		//Criar colunas
 		for (String col : colunas) {
 			exibirDados.addColumn(col);
-			System.out.println(col);
 		}
 		String[] linhas = new String[colunas.length];
 		List<Object> lista = listarTabela(c);
@@ -369,7 +356,6 @@ public class GenericDao {
 							if(pb.getIdPedido()==pc.getIdPedido()){
 
 								if(pb.getFechadoPedido()==0) {
-									System.out.println(pb.getIdPedido()+"Pedido passo"+pb.getFechadoPedido());
 									for(int x = 0; x<colunas.length; x++) {
 										if(x==0){
 											linhas[x]=""+cb.getIdComanda();
@@ -450,6 +436,7 @@ public class GenericDao {
         String baseDados = conexao.getCatalog();
 
         Field listaAtributos[] = cls.getDeclaredFields();
+        boolean dadoimg = false;
 
         String sql3 = "SELECT information_schema.KEY_COLUMN_USAGE.COLUMN_NAME as \"chave\" \n"
                 + "FROM information_schema.KEY_COLUMN_USAGE \n"
@@ -461,11 +448,18 @@ public class GenericDao {
         for (int i = 0; i < listaAtributos.length; i++) {
             Field fld = listaAtributos[i];
             fld.setAccessible(true);
-            campos += fld.getName() + " = '" + fld.get(obj) + "'";
+            if(fld.getName().equalsIgnoreCase("imgProduto")) {
+            	campos = campos + fld.getName() + " = ? ";
+            	dadoimg = true;
+            }else {
+        	campos += fld.getName() + " = '" + fld.get(obj) + "'";
+	        }
             if (i != (listaAtributos.length - 1)) {
                 campos += ", ";
             }
+                
             PreparedStatement stmt = conexao.prepareCall(sql3);
+
             ResultSet RS = stmt.executeQuery();
 
             while (RS.next()) {
@@ -480,6 +474,10 @@ public class GenericDao {
         }
         String sql = "UPDATE " + tabela + " SET " + campos + " WHERE " + lugar + "";
         PreparedStatement stmt = conexao.prepareCall(sql);
+        if(dadoimg == true) {
+            ProdutosBean pb = (ProdutosBean) obj;
+         	stmt.setBinaryStream(1, pb.getImgProduto());
+         }
         System.out.println(sql);
         stmt.execute();
         stmt.close();

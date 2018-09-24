@@ -147,6 +147,7 @@ public class TelaPrincipal extends JFrame {
 	private JTextField textFieldNomeClienteA;
 	private JTextField textFieldFidelidadeA;
 	private File file;
+	private InputStream in_alterar;
 
 	/**
 	 * Launch the application.
@@ -279,22 +280,11 @@ public class TelaPrincipal extends JFrame {
 				pb.setIdCategoria(comboBox.getSelectedIndex());
 				
 				try {
-					BufferedImage img = ImageIO.read(file);
-					ByteArrayOutputStream bytesImg = new ByteArrayOutputStream();
-					ImageIO.write((BufferedImage)img, "jpg", bytesImg);
-					bytesImg.flush();
-					byte[] byteArray = bytesImg.toByteArray();
-					bytesImg.close();
 					InputStream fis = new FileInputStream(file);
 					pb.setImgProduto(fis);
 					System.out.println(fis);
 					gd.adicionar(pb);
 					List<Object> lista = gd.listarTabela(ProdutosBean.class);
-					//ProdutosBean pb2 = (ProdutosBean) lista.get(lista.size()-1);
-					//gd.gravaIMG(pb2);
-				
-
-					
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -455,8 +445,9 @@ public class TelaPrincipal extends JFrame {
 					descricaoProdutoalterar.setText(pb.getDescricaoProduto());
 					valorAlterarProduto.setText(String.format("%.2f",pb.getValorProduto()));
 					comboBox_2.setSelectedIndex(pb.getIdCategoria());
-					gd.img(pb.getIdProduto(), lblImagemProdutoA);
+
 					InputStream in = pb.getImgProduto();
+					in_alterar = in;
 					BufferedImage img = ImageIO.read(in);
 					lblImagemProdutoA.setIcon(new ImageIcon(img.getScaledInstance(img.getWidth()/2, img.getHeight()/2, java.awt.Image.SCALE_SMOOTH)));
 					
@@ -579,6 +570,14 @@ public class TelaPrincipal extends JFrame {
 				pb.setDescricaoProduto(descricaoProdutoalterar.getText());
 				pb.setIdCategoria(comboBox_2.getSelectedIndex());
 				try {
+
+					if(file!= null) {
+						InputStream fis = new FileInputStream(file);
+						pb.setImgProduto(fis);
+					}else {
+						InputStream fis = in_alterar;
+						pb.setImgProduto(fis);
+					}
 					gd.alterar(pb);
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
@@ -590,6 +589,9 @@ public class TelaPrincipal extends JFrame {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -630,6 +632,33 @@ public class TelaPrincipal extends JFrame {
 		panelAlterarProdutos.add(btnCancelar);
 
 		btnAdicionarImagemA = new JButton("+");
+		btnAdicionarImagemA.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				BufferedImage conteudo = null;
+		        String caminho = null;
+		        try {
+		            JFileChooser jFileChooser = new JFileChooser();
+		            int ok = jFileChooser.showOpenDialog(null);
+		            if (ok == JFileChooser.APPROVE_OPTION) {
+		                caminho = jFileChooser.getCurrentDirectory().getPath();
+		                caminho +=  "\\";
+		                caminho	+= jFileChooser.getSelectedFile().getName(); // caminho do arquivo"
+		                System.out.println(caminho);
+		                file = new File(caminho);
+		                conteudo = ImageIO.read(file);
+		                //System.out.println(conteudo);
+		            } else {
+		                jFileChooser.cancelSelection();
+		            }
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+		        ImageIcon img = new ImageIcon(conteudo.getScaledInstance(conteudo.getWidth()/2, conteudo.getHeight()/2, java.awt.Image.SCALE_SMOOTH));
+				lblImagemProdutoA.setIcon(img);
+				lblImagemProdutoA.setText("");
+			}
+		});
 		btnAdicionarImagemA.setForeground(Color.WHITE);
 		btnAdicionarImagemA.setFont(new Font("Agency FB", Font.PLAIN, 30));
 		btnAdicionarImagemA.setFocusable(false);
