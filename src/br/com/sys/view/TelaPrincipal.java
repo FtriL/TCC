@@ -313,6 +313,14 @@ public class TelaPrincipal extends JFrame {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
+				campoNomeProduto.setText("");
+				formattedTextField.setText("");
+				descricaoProduto.setText("");
+				comboBox.setSelectedIndex(0);
+				
+				JOptionPane.showMessageDialog(null, "Produto cadastrado com sucesso!");
+				
 			}
 		});
 		btnAdicionar.setForeground(Color.WHITE);
@@ -342,6 +350,13 @@ public class TelaPrincipal extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				panelCadastrarProduto.setVisible(false);
+				
+				campoNomeProduto.setText("");
+				formattedTextField.setText("");
+				descricaoProduto.setText("");
+				comboBox.setSelectedIndex(0);
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!");
 
 			}
 		});
@@ -596,6 +611,12 @@ public class TelaPrincipal extends JFrame {
 					e.printStackTrace();
 				}
 				
+				campoNomeProdutoalterar.setText("");
+				valorAlterarProduto.setText("");
+				descricaoProdutoalterar.setText("");
+				comboBox_2.setSelectedIndex(0);
+				
+				JOptionPane.showMessageDialog(null, "Produto alterado com sucesso!");
 				
 			}
 		});
@@ -626,6 +647,13 @@ public class TelaPrincipal extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				panelAlterarProdutos.setVisible(false);
+				
+				campoNomeProdutoalterar.setText("");
+				valorAlterarProduto.setText("");
+				descricaoProdutoalterar.setText("");
+				comboBox_2.setSelectedIndex(0);
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!");
 
 			}
 		});
@@ -1182,6 +1210,8 @@ public class TelaPrincipal extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				panelFecharMesa.setVisible(false);
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!");
 
 			}
 		});
@@ -1281,6 +1311,8 @@ public class TelaPrincipal extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				panelPagamento.setVisible(false);
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!");
 
 			}
 		});
@@ -1402,6 +1434,8 @@ public class TelaPrincipal extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				panelFecharCaixa.setVisible(false);
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!");
 
 			}
 		});
@@ -1615,6 +1649,8 @@ public class TelaPrincipal extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				
 				panelListagemClientes.setVisible(false);
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!");
 				
 			}
 		});
