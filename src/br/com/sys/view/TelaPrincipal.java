@@ -356,7 +356,7 @@ public class TelaPrincipal extends JFrame {
 				descricaoProduto.setText("");
 				comboBox.setSelectedIndex(0);
 				
-				JOptionPane.showMessageDialog(null, "Opção cancelada!");
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
 
 			}
 		});
@@ -433,6 +433,8 @@ public class TelaPrincipal extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				panelListarProdutos.setVisible(false);
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
 
 			}
 		});
@@ -653,7 +655,7 @@ public class TelaPrincipal extends JFrame {
 				descricaoProdutoalterar.setText("");
 				comboBox_2.setSelectedIndex(0);
 				
-				JOptionPane.showMessageDialog(null, "Opção cancelada!");
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
 
 			}
 		});
@@ -1211,7 +1213,7 @@ public class TelaPrincipal extends JFrame {
 
 				panelFecharMesa.setVisible(false);
 				
-				JOptionPane.showMessageDialog(null, "Opção cancelada!");
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
 
 			}
 		});
@@ -1312,7 +1314,7 @@ public class TelaPrincipal extends JFrame {
 
 				panelPagamento.setVisible(false);
 				
-				JOptionPane.showMessageDialog(null, "Opção cancelada!");
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
 
 			}
 		});
@@ -1435,7 +1437,7 @@ public class TelaPrincipal extends JFrame {
 
 				panelFecharCaixa.setVisible(false);
 				
-				JOptionPane.showMessageDialog(null, "Opção cancelada!");
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
 
 			}
 		});
@@ -1650,7 +1652,7 @@ public class TelaPrincipal extends JFrame {
 				
 				panelListagemClientes.setVisible(false);
 				
-				JOptionPane.showMessageDialog(null, "Opção cancelada!");
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
 				
 			}
 		});
@@ -2021,6 +2023,18 @@ public class TelaPrincipal extends JFrame {
 		btnCancelarCadastroFuncionario.setFont(new Font("Agency FB", Font.PLAIN, 30));
 		btnCancelarCadastroFuncionario.setBounds(115, 455, 519, 55);
 		panelCadastroFuncionarios.add(btnCancelarCadastroFuncionario);
+		btnCancelarCadastroFuncionario.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				panelCadastroFuncionarios.setVisible(false);
+				contentPane.setVisible(true);
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
+				
+			}
+		});
 		
 		/** Panel Listagem Funcionarios **/
 		
@@ -2046,15 +2060,6 @@ public class TelaPrincipal extends JFrame {
 		btnCancelarFuncionarios.setFont(new Font("Agency FB", Font.PLAIN, 30));
 		btnCancelarFuncionarios.setBounds(487, 519, 158, 41);
 		panelListagemFuncionarios.add(btnCancelarFuncionarios);
-		btnCancelarFuncionarios.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				panelListagemFuncionarios.setVisible(false);
-				
-			}
-		});
 
 		JButton btnAlterarFuncionarios = new JButton("ALTERAR");
 		btnAlterarFuncionarios.setForeground(new Color(255, 255, 255));
@@ -2192,6 +2197,18 @@ public class TelaPrincipal extends JFrame {
 		btnCancelarCadastroFuncionarios.setFont(new Font("Agency FB", Font.PLAIN, 30));
 		btnCancelarCadastroFuncionarios.setBounds(115, 434, 519, 55);
 		panelAlterarFuncionarios.add(btnCancelarCadastroFuncionarios);
+		btnCancelarCadastroFuncionarios.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				panelCadastroFuncionarios.setVisible(false);
+				
+				
+				JOptionPane.showMessageDialog(null, "Opção cancelada!","Título",0);
+				
+			}
+		});
 
 		/*************************************************************************************************************/
 
